@@ -1,6 +1,7 @@
 import React from 'react';
 import { Form, Message, Button, Container, Header } from 'semantic-ui-react';
-import { gql, graphql } from 'react-apollo';
+import { graphql } from 'react-apollo';
+import gql from 'graphql-tag';
 
 class Register extends React.Component {
   state = {
@@ -71,44 +72,38 @@ class Register extends React.Component {
       <Container text textAlign="center">
         <Form>
           <Header as="h2">Register</Header>
-          <Form.Field>
+          <Form.Field error={!!usernameError}>
             <input
-              error={!!usernameError}
               name="username"
               onChange={this.onChange}
               placeholder="Username"
               value={username}
-              fluid
             />
           </Form.Field>
-          <Form.Field>
+          <Form.Field error={!!emailError}>
             <input
-              error={!!emailError}
               name="email"
               onChange={this.onChange}
               placeholder="Email"
               value={email}
-              fluid
             />
           </Form.Field>
-          <Form.Field>
+          <Form.Field error={!!passwordError}>
             <input
-              error={!!passwordError}
               name="password"
               onChange={this.onChange}
               placeholder="Password"
               value={password}
-              fluid
               type="password"
             />
           </Form.Field>
-          {usernameError || emailError || passwordError ? (
-            <Message error header="There were some errors" list={errorList} />
-          ) : null}
           <Button onClick={this.onClick} primary>
             Submit
           </Button>
         </Form>
+        {usernameError || emailError || passwordError ? (
+          <Message error header="There were some errors" list={errorList} />
+        ) : null}
       </Container>
     );
   }

@@ -1,8 +1,9 @@
 import React from 'react';
 import { extendObservable } from 'mobx';
-import { Form, Button, Input, Container, Header } from 'semantic-ui-react';
+import { Form, Button, Message, Container, Header } from 'semantic-ui-react';
 import { observer } from 'mobx-react';
-import { gql, graphql } from 'react-apollo';
+import { graphql } from 'react-apollo';
+import gql from 'graphql-tag';
 
 class Login extends React.Component {
   constructor(props) {
@@ -10,7 +11,9 @@ class Login extends React.Component {
 
     extendObservable(this, {
       email: '',
-      password: ''
+      password: '',
+      emailError: '',
+      passwordError: ''
     });
   }
 
@@ -19,45 +22,61 @@ class Login extends React.Component {
     this[name] = value;
   };
 
-  onClick = async e => {
+  onClick = async () => {
+    this.emailError = '';
+    this.passwordError = '';
     const { email, password } = this;
     const response = await this.props.mutate({
       variables: { email, password }
     });
 
-    const { ok, token, refreshToken } = response.data.login;
+    const { ok, token, refreshToken, errors } = response.data.login;
 
     if (ok) {
       localStorage.setItem('token', token);
       localStorage.setItem('refreshToken', refreshToken);
+      this.props.history.push('/view_team');
+    } else {
+      errors.forEach(e => {
+        this[`${e.path}Error`] = e.message;
+      });
     }
 
     console.log(response);
   };
 
   render() {
-    const { email, password } = this;
+    const { email, password, emailError, passwordError } = this;
+
+    const errorList = [];
+
+    if (emailError) {
+      errorList.push(emailError);
+    }
+
+    if (passwordError) {
+      errorList.push(passwordError);
+    }
 
     return (
       <Container text textAlign="center">
         <Form>
-          <Header as="h2">Register</Header>
+          <Header as="h2">Login</Header>
           <Form.Field>
             <Form.Input
+              error={!!emailError}
               name="email"
               onChange={this.onChange}
               placeholder="Email"
               value={email}
-              fluid
             />
           </Form.Field>
-          <Form.Field>
+          <Form.Field error={!!passwordError}>
             <Form.Input
               name="password"
               onChange={this.onChange}
               placeholder="Password"
               value={password}
-              fluid
               type="password"
             />
           </Form.Field>
@@ -65,6 +84,9 @@ class Login extends React.Component {
             Submit
           </Button>
         </Form>
+        {emailError || passwordError ? (
+          <Message error header="There were some errors" list={errorList} />
+        ) : null}
       </Container>
     );
   }
