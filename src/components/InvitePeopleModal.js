@@ -81,24 +81,6 @@ export default compose(
               name: values.name
             }
           }
-        },
-        update: (store, { data: { createChannel } }) => {
-          const { ok, channel } = createChannel;
-          if (!ok) {
-            setSubmitting(false);
-            onClose();
-            return;
-          }
-          const data = store.readQuery({ query: allTeamsQuery });
-          console.log(data);
-
-          const teamIdx = findIndex(data.allTeams, ['id', teamId]);
-          console.log(teamIdx);
-
-          data.allTeams[teamIdx].channels.push(channel);
-          store.writeQuery({ query: allTeamsQuery, data });
-          setSubmitting(false);
-          onClose();
         }
       });
     }

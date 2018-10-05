@@ -13,7 +13,7 @@ import { setContext } from 'apollo-link-context';
 import Routes from './routes';
 
 const httpLink = createHttpLink({
-  uri: 'http://localhost:8080/graphql'
+  uri: ' http://localhost:8080/graphql'
 });
 
 const middlewareLink = setContext(() => ({

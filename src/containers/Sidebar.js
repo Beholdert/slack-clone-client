@@ -1,19 +1,15 @@
 import React from 'react';
 
-import { findIndex } from 'lodash';
 import decode from 'jwt-decode';
-
-import { graphql } from 'react-apollo';
-import gql from 'graphql-tag';
 
 import Channels from '../components/Channels';
 import Teams from '../components/Teams';
 import AddChannelModal from '../components/AddChannelModal';
-import { Redirect } from 'react-router-dom';
-
-class Sidebar extends React.Component {
+import InvitePeopleModal from '../components/InvitePeopleModal';
+export default class Sidebar extends React.Component {
   state = {
-    openAddChannelModal: false
+    openAddChannelModal: false,
+    openInvitePeopleModal: false
   };
 
   handleAddChannelClick = () => {
@@ -24,26 +20,17 @@ class Sidebar extends React.Component {
     this.setState({ openAddChannelModal: false });
   };
 
+  handleInvitePeopleClick = () => {
+    this.setState({ openInvitePeopleModal: true });
+  };
+
+  handleCloseInvitePeopleModal = () => {
+    this.setState({ openInvitePeopleModal: false });
+  };
+
   render() {
-    const {
-      data: { loading, allTeams, error },
-      currentTeamId
-    } = this.props;
+    const { teams, team } = this.props;
 
-    if (loading) {
-      return null;
-    }
-
-    if (error) {
-      return <Redirect to="/login" />;
-    }
-
-    const teamIdx = currentTeamId
-      ? findIndex(allTeams, ['id', parseInt(currentTeamId, 10)])
-      : 0;
-    const team = allTeams[teamIdx];
-
-    console.log(allTeams);
     let username = '';
 
     try {
@@ -58,39 +45,27 @@ class Sidebar extends React.Component {
 
     return (
       <React.Fragment>
-        <Teams
-          teams={allTeams.map(t => ({
-            id: t.id,
-            letter: t.name.charAt(0).toUpperCase()
-          }))}
-        />
+        <Teams teams={teams} />
         <Channels
+          teamId={team.id}
           teamName={team.name}
           username={username}
           channels={team.channels}
           users={[{ id: 1, name: 'slackbot' }, { id: 2, name: 'user2' }]}
           onAddChannelClick={this.handleAddChannelClick}
+          onInvitePeople={this.handleInvitePeopleClick}
         />
         <AddChannelModal
+          teamId={team.id}
           onClose={this.handleCloseAddChannelModal}
           open={this.state.openAddChannelModal}
+        />
+        <InvitePeopleModal
+          teamId={team.id}
+          onClose={this.handleInvitePeopleClick}
+          open={this.state.handleCloseInvitePeopleModal}
         />
       </React.Fragment>
     );
   }
 }
-
-const allTeamsQuery = gql`
-  {
-    allTeams {
-      id
-      name
-      channels {
-        id
-        name
-      }
-    }
-  }
-`;
-
-export default graphql(allTeamsQuery)(Sidebar);
